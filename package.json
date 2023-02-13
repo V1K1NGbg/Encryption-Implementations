@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "ml-matrix": "^6.10.4",
+    "prompt-sync": "^4.2.0"
+  }
+}
