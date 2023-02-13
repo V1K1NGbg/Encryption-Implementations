@@ -1,26 +1,13 @@
-const { Matrix, inverse } = require("ml-matrix");
+const { Matrix } = require("ml-matrix");
 
-const prompt = require("prompt-sync")();
+// const prompt = require("prompt-sync")();
 
 function convln(letter) {
-    if (letter.charCodeAt(0) > 96) {
-        return letter.charCodeAt(0) - 70;
-    } else if (letter.charCodeAt(0) > 64) {
-        return letter.charCodeAt(0) - 64;
-    } else {
-        return 0;
-    }
-
+    return letter.charCodeAt(0) - 32;
 }
 
 function convnl(num) {
-    if (num > 26) {
-        return String.fromCharCode(num + 70);
-    } else if (num > 0) {
-        return String.fromCharCode(num + 64);
-    } else {
-        return " ";
-    }
+    return String.fromCharCode(num + 32);
 }
 
 function splitfromstring(str, num) {
@@ -36,7 +23,7 @@ function splitfromstring(str, num) {
     return result;
 }
 
-function encrypt(e, splitamount, k) {
+function encrypt(e, splitamount, k, numofc) {
     e = splitfromstring(e, splitamount);
     let result = [];
     for (let i = 0; i < e.length; i++) {
@@ -48,50 +35,64 @@ function encrypt(e, splitamount, k) {
     return result;
 }
 
-function modinverse(a, m)
-{
-    if (a <= 0) {
-        console.error("error when calculating the inverse");
-    }
-    for(let x = 1; true; x++)
-        if ((a*x)%m == 1) {
-            return x
-        }
+function modinverse(a, prime) {
+    for (let x = 1; x < prime; x++) if ((a * x) % prime == 1) return x;
+
+    return -1;
 }
 
-const numofc = 53
-
-
-let key = prompt("Encrypted key (a,b,c,d): ")
-
-key = key.split(",").map(Number);
-
-key = new Matrix([
-    [key[0], key[1]],
-    [key[2], key[3]],
-]);
-
-inversekey = new Matrix([
-    [key.get(1,1), -key.get(0,1)],
-    [-key.get(1,0), key.get(0,0)],
-]);
-
-inversekey = Matrix.mul(inversekey, modinverse(((inversekey.get(0,0)*inversekey.get(1,1)) - (inversekey.get(0,1)*inversekey.get(1,0))),numofc))
-
-
-for (let i = 0; i < inversekey.rows; i++) {
-    for (let j = 0; j < inversekey.columns; j++) {
-        if (inversekey.get(i, j) < 0) {
-            inversekey.set(i, j, inversekey.get(i, j)+numofc)
+function inversek(k, numofc) {
+    inversekey = new Matrix([
+        [k.get(1, 1), -k.get(0, 1)],
+        [-k.get(1, 0), k.get(0, 0)],
+    ]);
+    
+    inversekey = Matrix.mul(
+        inversekey,
+        modinverse(
+            inversekey.get(0, 0) * inversekey.get(1, 1) -
+                inversekey.get(0, 1) * inversekey.get(1, 0),
+            numofc
+        )
+    );
+    
+    inversekey = Matrix.mod(inversekey, numofc);
+    
+    for (let i = 0; i < inversekey.rows; i++) {
+        for (let j = 0; j < inversekey.columns; j++) {
+            if (inversekey.get(i, j) < 0) {
+                inversekey.set(i, j, inversekey.get(i, j) + numofc);
+            }
         }
     }
+    return inversekey
 }
-let text = prompt("Encrypted message: ")
 
-enctext = encrypt(text, 2, key);
+module.exports = {encrypt, inversek}
 
-console.log(enctext);
+// const numofc = 95;
 
-dectext = encrypt(enctext, 2, inversekey);
+// let key = prompt("Encrypted key (a,b,c,d): ");
 
-console.log(dectext);
+// key = "3,3,2,5";
+
+// key = key.split(",").map(Number);
+
+// key = new Matrix([
+//     [key[0], key[1]],
+//     [key[2], key[3]],
+// ]);
+
+// inversekey = inversek(key)
+
+// // let text = prompt("msg: ");
+
+// // enctext = encrypt(text, 2, key);
+
+// // console.log("enc: "+enctext);
+
+// text = "sQkxP@nd9N"
+
+// dectext = encrypt(text, 2, inversekey);
+
+// console.log("dec: "+dectext);
