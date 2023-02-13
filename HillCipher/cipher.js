@@ -59,7 +59,7 @@ function modinverse(a, m)
         }
 }
 
-const numofc = 26
+const numofc = 53
 
 
 let key = prompt("Encrypted key (a,b,c,d): ")
