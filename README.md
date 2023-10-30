@@ -1,5 +1,5 @@
 # Encryption-Implementations
-Testing some encryption methods using different common encryption methods
+Testing some encryption types using different common encryption methods
 
 
 You can make it CLI (kind of) on Linux (only in the current shell!) by running:
